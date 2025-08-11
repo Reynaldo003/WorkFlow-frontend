@@ -60,7 +60,8 @@ function LoginRegistro() {
         });
         const data = await res.json();
         if (res.status === 201) {
-            navigate("/loginregistro");
+            setMensaje("Registro exitoso, por favor inicia sesión.");
+            setMostrarLogin(true);
         } else {
             alert("Error: " + JSON.stringify(data));
         }
@@ -69,6 +70,8 @@ function LoginRegistro() {
     return (
 
         <div className=" bg-gradient-to-br from-[#314b8f] to-[#0f2866] min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden">
+            {mensaje && <p className="text-green-600">{mensaje}</p>}
+
             <div className="relative w-full max-w-4xl h-[550px] bg-white shadow-2xl rounded-xl overflow-hidden">
                 <motion.div
                     initial={false}
