@@ -4,36 +4,72 @@ import { HotTable } from "@handsontable/react";
 import "handsontable/dist/handsontable.full.min.css";
 import * as XLSX from "xlsx";
 import { Upload, Download, Plus, Rows, Columns, Trash2 } from "lucide-react";
+import { useParams } from "react-router-dom";
+
+const DEFAULT_SHEET = { id: crypto.randomUUID(), name: "Hoja 1", data: [[""]] };
 
 export default function ExcelEditor({ topbarHeight = 64 }) {
     const SIDEBAR_EXPANDED = 256;
     const SIDEBAR_COLLAPSED = 64;
 
+    const { idArchivo } = useParams();
+    const token = localStorage.getItem("token");
+
+    const [sheets, setSheets] = useState([DEFAULT_SHEET]);
+    const [activeIdx, setActiveIdx] = useState(0);
+
     const [sidebarOpen, setSidebarOpen] = useState(
         () => !document.documentElement.classList.contains("sidebar-collapsed")
     );
+
+    const hotRef = useRef(null);
+    const saveTimer = useRef(null);
+
+    const guardarEstructura = async (nuevasSheets) => {
+        await fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/estructura/`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Token ${token}`,
+            },
+            body: JSON.stringify({ estructura: { sheets: nuevasSheets } }),
+        });
+    };
+
+    const scheduleSave = (payload) => {
+        clearTimeout(saveTimer.current);
+        // Ajusta el debounce si quieres más/menos frecuencia
+        saveTimer.current = setTimeout(() => guardarEstructura(payload), 400);
+    };
+
+    // Carga inicial desde backend
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const res = await fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/`, {
+                headers: { Authorization: `Token ${token}` },
+            });
+            const data = await res.json();
+            if (cancelled) return;
+            const loaded = Array.isArray(data?.estructura?.sheets) && data.estructura.sheets.length
+                ? data.estructura.sheets
+                : [DEFAULT_SHEET];
+            setSheets(loaded);
+            setActiveIdx(0);
+            // Si el backend venía sin estructura, la inicializamos
+            if (!data?.estructura?.sheets?.length) scheduleSave(loaded);
+        })();
+        return () => { cancelled = true; };
+    }, [idArchivo, token]);
+
+    // Sidebar responsive
     useEffect(() => {
         const onToggle = (e) => setSidebarOpen(!!e.detail?.open);
         window.addEventListener("sidebar:toggle", onToggle);
         return () => window.removeEventListener("sidebar:toggle", onToggle);
     }, []);
 
-    const [sheets, setSheets] = useState([
-        { id: crypto.randomUUID(), name: "Hoja 1", data: [["", "", ""], ["", "", ""], ["", "", ""]] },
-    ]);
-    const [activeIdx, setActiveIdx] = useState(0);
-
-    const hotRef = useRef(null);
-
-    const colHeaders = useMemo(() => {
-        const cols = Math.max(...sheets.map((s) => s.data[0]?.length || 0));
-        return Array.from({ length: cols }, (_, i) =>
-            i >= 26
-                ? String.fromCharCode(65 + Math.floor(i / 26) - 1) + String.fromCharCode(65 + (i % 26))
-                : String.fromCharCode(65 + i)
-        );
-    }, [sheets]);
-
+    // Recalcular dimensiones al redimensionar
     useEffect(() => {
         const onResize = () => hotRef.current?.hotInstance?.refreshDimensions();
         window.addEventListener("resize", onResize);
@@ -44,6 +80,24 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
         };
     }, []);
 
+    // Utilidad para aplicar cambios y guardar
+    const applyAndSave = (updater) => {
+        setSheets((prev) => {
+            const next = typeof updater === "function" ? updater(prev) : updater;
+            scheduleSave(next);
+            return next;
+        });
+    };
+
+    const colHeaders = useMemo(() => {
+        const cols = Math.max((sheets[activeIdx]?.data?.[0]?.length) || 1, 1);
+        return Array.from({ length: cols }, (_, i) =>
+            i >= 26
+                ? String.fromCharCode(65 + Math.floor(i / 26) - 1) + String.fromCharCode(65 + (i % 26))
+                : String.fromCharCode(65 + i)
+        );
+    }, [sheets, activeIdx]);
+
     const handleImport = (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -53,10 +107,16 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
             const newSheets = wb.SheetNames.map((name, idx) => {
                 const ws = wb.Sheets[name];
                 const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-                return { id: crypto.randomUUID(), name: name || `Hoja ${idx + 1}`, data: data.length ? data : [[""]] };
+                return {
+                    id: crypto.randomUUID(),
+                    name: name || `Hoja ${idx + 1}`,
+                    data: data.length ? data : [[""]],
+                };
             });
-            setSheets(newSheets.length ? newSheets : sheets);
+            const finalSheets = newSheets.length ? newSheets : [DEFAULT_SHEET];
+            setSheets(finalSheets);
             setActiveIdx(0);
+            scheduleSave(finalSheets);
         };
         reader.readAsArrayBuffer(file);
         event.target.value = "";
@@ -74,34 +134,41 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
     const sanitizeSheetName = (name) => String(name).slice(0, 31).replace(/[\\/?*\[\]:]/g, "_");
 
     const addSheet = () => {
-        setSheets((prev) => [...prev, { id: crypto.randomUUID(), name: `Hoja ${prev.length + 1}`, data: [[""]] }]);
-        setActiveIdx(sheets.length);
-    };
-    const removeSheet = (idx) => {
-        if (sheets.length === 1) return;
-        const next = sheets.filter((_, i) => i !== idx);
-        setSheets(next);
-        setActiveIdx(Math.max(0, idx - 1));
-    };
-    const addRow = () =>
-        setSheets((prev) => {
-            const clone = structuredClone(prev);
-            const cols = clone[activeIdx].data[0]?.length || 1;
-            clone[activeIdx].data.push(Array.from({ length: cols }, () => ""));
-            return clone;
+        applyAndSave((prev) => {
+            const next = [...prev, { id: crypto.randomUUID(), name: `Hoja ${prev.length + 1}`, data: [[""]] }];
+            // Mueve el índice activo a la hoja nueva
+            setActiveIdx(next.length - 1);
+            return next;
         });
+    };
+
+    const removeSheet = (idx) => {
+        applyAndSave((prev) => {
+            if (prev.length === 1) return prev; // no borrar la última
+            const next = prev.filter((_, i) => i !== idx);
+            setActiveIdx((old) => Math.min(old, next.length - 1));
+            return next;
+        });
+    };
+
+    const addRow = () =>
+        applyAndSave((prev) => {
+            const next = structuredClone(prev);
+            const cols = next[activeIdx].data[0]?.length || 1;
+            next[activeIdx].data.push(Array.from({ length: cols }, () => ""));
+            return next;
+        });
+
     const addCol = () =>
-        setSheets((prev) => {
-            const clone = structuredClone(prev);
-            clone[activeIdx].data = (clone[activeIdx].data.length ? clone[activeIdx].data : [[""]]).map((row) => [
-                ...row,
-                "",
-            ]);
-            return clone;
+        applyAndSave((prev) => {
+            const next = structuredClone(prev);
+            next[activeIdx].data = (next[activeIdx].data.length ? next[activeIdx].data : [[""]]).map((row) => [...row, ""]);
+            return next;
         });
 
     const sidebarWidth = sidebarOpen ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED;
     const contentMaxWidth = `min(1400px, calc(100vw - ${sidebarWidth}px))`;
+    const activeSheet = sheets[activeIdx] ?? DEFAULT_SHEET;
 
     return (
         <div
@@ -158,8 +225,8 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
                             <div
                                 key={s.id}
                                 className={`group flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer ${i === activeIdx
-                                    ? "bg-yellow-400/20 border-yellow-500 text-yellow-800 dark:text-yellow-300"
-                                    : "bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                                        ? "bg-yellow-400/20 border-yellow-500 text-yellow-800 dark:text-yellow-300"
+                                        : "bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700"
                                     }`}
                                 onClick={() => setActiveIdx(i)}
                                 title={s.name}
@@ -183,12 +250,12 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
                 </div>
             </div>
 
-            <div className="bg-neutral dark:bg-[#1e2431]">
-                <div className="flex-auto h-[500px] w-full rounded-xl border border-gray-400 dark:border-neutral overflow-hidden">
+            <div className="bg-neutral-50 dark:bg-[#1e2431]">
+                <div className="flex-auto h-[500px] w-full rounded-xl border border-gray-300 dark:border-neutral-700 overflow-hidden">
                     <HotTable
                         className="dark:bg-[#1e2431] dark:text-white"
                         ref={hotRef}
-                        data={sheets[activeIdx].data}
+                        data={activeSheet.data}
                         colHeaders={colHeaders}
                         rowHeaders
                         width="100%"
@@ -205,11 +272,12 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
                         licenseKey="non-commercial-and-evaluation"
                         afterChange={(changes, source) => {
                             if (!changes || source === "loadData") return;
-                            setSheets((prev) => {
+                            applyAndSave((prev) => {
                                 const next = structuredClone(prev);
                                 const grid = next[activeIdx].data;
                                 changes.forEach(([r, c, _old, val]) => {
-                                    if (grid[r]) grid[r][c] = val;
+                                    if (!grid[r]) grid[r] = [];
+                                    grid[r][c] = val;
                                 });
                                 return next;
                             });

@@ -118,7 +118,7 @@ export default function Tablero() {
 
     useEffect(() => {
         const fetchTablero = async () => {
-            const res = await fetch(`http://127.0.0.1:8000/tablero/${idTablero}/`, {
+            const res = await fetch(`http://127.0.0.1:8000/archivo/${idTablero}/`, {
                 //const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/tablero/${idTablero}/`, {
                 headers: { "Authorization": `Token ${token}` }
             });
@@ -132,7 +132,7 @@ export default function Tablero() {
     }, [idTablero, token]);
 
     const guardarEstructura = async (nuevasCols, nuevasFilas) => {
-        await fetch(`http://127.0.0.1:8000/tablero/${idTablero}/estructura/`, {
+        await fetch(`http://127.0.0.1:8000/archivo/${idTablero}/estructura/`, {
             //await fetch(`https://workflow-backend-production-991d.up.railway.app/tablero/${idTablero}/estructura/`, {
             method: "PATCH",
             headers: {

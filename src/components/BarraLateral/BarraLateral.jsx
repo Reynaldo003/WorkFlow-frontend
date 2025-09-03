@@ -62,8 +62,6 @@ export default function BarraLateral() {
 
       <nav className="flex flex-col flex-grow mt-1 space-y-0.5 text-[13px]">
         <NavLinkItem icon={House} text="Inicio" to="/" open={open} />
-        <NavLinkItem icon={FileText} text="Word" to="/word/nuevo" open={open} />
-        <NavLinkItem icon={FileSpreadsheet} text="Excel" to="/excel/nuevo" open={open} />
         <NavLinkItem icon={FileChartColumnIncreasing} text="Power BI" to="/powerbi/nuevo" open={open} />
         <NavLinkItem icon={StickyNote} text="Plantillas" to="/plantillas" open={open} />
         <div className={`px-3 ${open ? "pt-1" : ""}`}>

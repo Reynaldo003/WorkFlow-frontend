@@ -80,7 +80,7 @@ export default function Invitar() {
             </button>
 
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
+                <div className="mt-60 fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
                     <div className="w-full max-w-md rounded-xl bg-white p-4 shadow-xl dark:bg-[#0F1A34]">
                         <h2 className="text-base font-bold mb-3 text-[#11192E] dark:text-white">Invitar usuario</h2>
 

@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react'
+import { useParams } from "react-router-dom";
 import { EditorContent, useEditor, useEditorState } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TextStyle } from '@tiptap/extension-text-style'
@@ -12,11 +13,13 @@ import Image from '@tiptap/extension-image'
 import FontFamily from '@tiptap/extension-font-family'
 import '../../App.css'
 import {
-    Bold, Italic, Strikethrough, Underline as UnderlineIcon, Code,
+    Bold, Italic, Strikethrough, Code,
     List, ListOrdered, Quote, Minus, RotateCcw, RotateCw, Type,
     Link as LinkIcon, Unlink, AlignLeft, AlignCenter, AlignRight, AlignJustify,
-    IndentIncrease, IndentDecrease, PaintBucket, Image as ImageIcon
-} from 'lucide-react'
+    IndentIncrease, IndentDecrease, PaintBucket, Image as ImageIcon, Square
+} from 'lucide-react';
+import { Icon } from 'lucide-react';
+import { underlineSquare } from '@lucide/lab';
 /**
  * NOTA IMPORTANTE:
  * - Asegúrate de que tu layout añada la clase `dark` en <html> cuando esté en modo oscuro.
@@ -275,7 +278,8 @@ function MenuBar({ editor }) {
                     <Italic className="w-4 h-4" />
                 </ToolbarButton>
                 <ToolbarButton title="Subrayado" active={st.isUnderline} onClick={() => editor.chain().focus().toggleUnderline().run()}>
-                    <UnderlineIcon className="w-4 h-4" />
+                    <Icon iconNode={underlineSquare} />
+
                 </ToolbarButton>
                 <ToolbarButton title="Tachado" active={st.isStrike} disabled={!st.canStrike} onClick={() => editor.chain().focus().toggleStrike().run()}>
                     <Strikethrough className="w-4 h-4" />
@@ -354,14 +358,10 @@ function MenuBar({ editor }) {
  * - sidebarExpanded, sidebarWidthExpanded, sidebarWidthCollapsed: para adaptar al layout con sidebar
  * - initialContent: HTML inicial
  */
-export default function RichTextEditor({
-    initialContent = `
-    <h2>Hola 👋</h2>
-    <p>Este editor replica funciones clave tipo Word: estilos, listas, alineación, color, enlaces e imágenes.</p>
-    <ul><li>Viñetas</li><li>Listas ordenadas</li></ul>
-    <blockquote>“La simplicidad es la máxima sofisticación.”</blockquote>
-  `,
-}) {
+export default function RichTextEditor() {
+    const { idArchivo } = useParams();
+    const token = localStorage.getItem("token");
+
     // Alineado con tu sidebar (w-64 / w-16)
     const SIDEBAR_EXPANDED = 256
     const SIDEBAR_COLLAPSED = 64
@@ -378,9 +378,31 @@ export default function RichTextEditor({
 
     const editor = useEditor({
         extensions,
-        content: initialContent,
+        content: "",
         editorProps: { attributes: { class: 'tiptap min-h-[360px] outline-none' } },
-    })
+        onUpdate: ({ editor }) => {
+            fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/estructura/`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Token ${token}`
+                },
+                body: JSON.stringify({ estructura: { html: editor.getHTML() } })
+            });
+        }
+    });
+    useEffect(() => {
+        fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/`, {
+            headers: { "Authorization": `Token ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.estructura?.html) {
+                    editor?.commands.setContent(data.estructura.html);
+                }
+            });
+    }, [idArchivo, token, editor]);
+
 
     const availableWidth = `min(1200px, calc(100vw - ${(sidebarOpen ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED)}px))`
 
