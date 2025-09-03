@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, Users, Folder, FolderPlus, FileText, FileSpreadsheet, LayoutDashboard } from "lucide-react";
+import { ChevronDown, Users, Folder, FolderPlus, LayoutDashboard, FileText, FileSpreadsheet } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import OpcionesArchivo from "./OpcionesArchivo";
 
@@ -14,88 +14,68 @@ export default function MenuEquipo({ open }) {
     const fetchTeams = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("https://workflow-backend-production-991d.up.railway.app/lista_equipos/", {
-                headers: { "Authorization": `Token ${token}` },
+            const res = await fetch(`http://127.0.0.1:8000/lista_equipos/`, {
+                headers: { Authorization: `Token ${token}` },
             });
             const data = await res.json();
 
-            // Para cada equipo, traer sus tableros
-            const equiposConTableros = await Promise.all(
+            const equiposConArchivos = await Promise.all(
                 data.equipos.map(async (eq) => {
-                    const resTabs = await fetch(`https://workflow-backend-production-991d.up.railway.app/equipos/${eq.id_equipo}/tableros/`, {
-                        headers: { "Authorization": `Token ${token}` },
+                    const archivosRes = await fetch(`http://127.0.0.1:8000/equipos/${eq.id_equipo}/tableros/`, {
+                        headers: { Authorization: `Token ${token}` },
                     });
-                    const tabsData = await resTabs.json();
+                    const archivosData = await archivosRes.json();
                     return {
                         id: eq.id_equipo,
                         name: eq.nombre_equipo,
-                        tableros: tabsData.tableros
+                        archivos: archivosData.archivos || [],
                     };
                 })
             );
-
-            setTeams(equiposConTableros);
+            setTeams(equiposConArchivos);
         } catch (err) {
             console.error(err);
         }
     };
 
-
-    // 🔹 Llamar a fetchTeams al montar el componente
     useEffect(() => {
         fetchTeams();
     }, []);
 
-    const agregarArchivo = (tipo, idEquipo) => {
-        setTeams(prev =>
-            prev.map(team =>
-                team.id === idEquipo
-                    ? {
-                        ...team,
-                        files: [
-                            ...(team.files || []),
-                            {
-                                id: crypto.randomUUID(),
-                                type: tipo,
-                                name:
-                                    tipo === "excel"
-                                        ? "Nuevo Excel"
-                                        : tipo === "word"
-                                            ? "Nuevo Word"
-                                            : "Nuevo Tablero"
-                            }
-                        ]
-                    }
-                    : team
-            )
-        );
+    const crearArchivo = async (tipo, idEquipo) => {
+        const titulo = prompt(`Título del ${tipo}:`) || `Nuevo ${tipo}`;
+        const token = localStorage.getItem("token");
+        const res = await fetch(`http://127.0.0.1:8000/archivo/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Token ${token}` },
+            body: JSON.stringify({ tipo, titulo, id_equipo: idEquipo }),
+        });
+        if (!res.ok) return alert("Error al crear");
+        const data = await res.json(); // {id_archivo, tipo, estructura}
+        await fetchTeams();
+        window.location.href = `/${data.tipo}/${data.id_archivo}`;
     };
 
     const toggleArchivos = (id) => {
-        setSelectedTeamId(prev => (prev === id ? null : id));
+        setSelectedTeamId((prev) => (prev === id ? null : id));
     };
 
-    //Crear equipo y luego refrescar la lista
     const crearEquipo = async () => {
         if (!newTeamName.trim()) return;
-
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("https://workflow-backend-production-991d.up.railway.app/cequipo/", {
+            const res = await fetch("http://127.0.0.1:8000/cequipo/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Token ${token}`,
+                    Authorization: `Token ${token}`,
                 },
                 body: JSON.stringify({
                     nombre_equipo: newTeamName.trim(),
-                    descripcion: "Creado desde el frontend"
+                    descripcion: "Creado desde el frontend",
                 }),
             });
-
             if (!res.ok) throw new Error("Error al crear equipo");
-
-            // 🔹 Volvemos a llamar a la API para tener la lista actualizada
             await fetchTeams();
             setNewTeamName("");
             setShowInput(false);
@@ -103,83 +83,45 @@ export default function MenuEquipo({ open }) {
             console.error("Error al crear equipo:", err);
         }
     };
-    const crearTablero = async (idEquipo) => {
-        const titulo = prompt("Título del tablero:");
-        if (!titulo) return;
-
-        const descripcion = prompt("Descripción del tablero:") || "";
-
-        try {
-            const token = localStorage.getItem("token");
-            const res = await fetch("https://workflow-backend-production-991d.up.railway.app/tablero/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Token ${token}`,
-                },
-                body: JSON.stringify({
-                    titulo,
-                    descripcion,
-                    id_equipo: idEquipo,
-                    id_plantilla: 1, // plantilla por defecto
-                }),
-            });
-
-            if (!res.ok) throw new Error("Error al crear tablero");
-            const data = await res.json();
-
-            // Recargar lista para que aparezca sin recargar la página
-            await fetchTeams();
-
-            // Redirige al tablero recién creado
-            window.location.href = `/tablero/${data.id_tablero}`;
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     return (
         <div className="text-white">
             <button
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center justify-between w-full px-2 py-2 hover:bg-white/10 rounded transition"
+                className="flex items-center justify-between w-full px-2 py-1.5 hover:bg-white/10 rounded transition"
             >
                 <div className="flex items-center gap-2">
-                    <Users />
-                    {open && <span className="text-sm font-semibold">Equipos de trabajo</span>}
+                    <Users className="h-4 w-4" />
+                    {open && <span className="text-[12px] font-semibold">Equipos de trabajo</span>}
                 </div>
-                {open && <ChevronDown className={`transform transition-transform ${expanded ? "rotate-180" : ""}`} />}
+                {open && <ChevronDown className={`h-4 w-4 transform transition-transform ${expanded ? "rotate-180" : ""}`} />}
             </button>
 
             {expanded && open && (
-                <ul className="mt-2 space-y-1">
+                <ul className="mt-1.5 space-y-0.5">
                     {teams.map((team) => (
                         <li key={team.id}>
-                            <div className="flex items-center justify-between px-4 py-2 hover:bg-white/10 rounded cursor-pointer group">
-                                <div onClick={() => toggleArchivos(team.id)} className="flex items-center gap-2">
-                                    <Folder className="text-blue-400" />
+                            <div className="flex items-center justify-between px-3 py-1.5 hover:bg-white/10 rounded cursor-pointer group">
+                                <div onClick={() => toggleArchivos(team.id)} className="flex items-center gap-2 min-w-0">
+                                    <Folder className="text-blue-400 h-4 w-4 shrink-0" />
                                     {editingId === team.id ? (
                                         <input
                                             autoFocus
                                             value={team.name}
                                             onChange={(e) =>
-                                                setTeams(prev =>
-                                                    prev.map(t =>
-                                                        t.id === team.id ? { ...t, name: e.target.value } : t
-                                                    )
-                                                )
+                                                setTeams((prev) => prev.map((t) => (t.id === team.id ? { ...t, name: e.target.value } : t)))
                                             }
                                             onBlur={() => setEditingId(null)}
                                             onKeyDown={(e) => {
-                                                if (e.key === "Enter") setEditingId(null);
-                                                if (e.key === "Escape") setEditingId(null);
+                                                if (e.key === "Enter" || e.key === "Escape") setEditingId(null);
                                             }}
-                                            className="bg-transparent border-b border-blue-300 outline-none text-white"
+                                            className="bg-transparent border-b border-blue-300 outline-none text-white text-[12px] w-full"
                                         />
                                     ) : (
                                         <span
                                             onDoubleClick={() => setEditingId(team.id)}
-                                            className="text-sm"
+                                            className="text-[12px] truncate"
+                                            title={team.name}
                                         >
                                             {team.name}
                                         </span>
@@ -187,33 +129,31 @@ export default function MenuEquipo({ open }) {
                                 </div>
 
                                 <OpcionesArchivo
-                                    onAdd={(tipo) => {
-                                        if (tipo === "tablero") {
-                                            crearTablero(team.id); // 🔹 Llama al backend
-                                        } else {
-                                            agregarArchivo(tipo, team.id); // 🔹 Solo local (word/excel)
-                                        }
-                                    }}
+                                    onAdd={(tipo) => crearArchivo(tipo, team.id)}
                                 />
-
                             </div>
 
-                            {selectedTeamId === team.id && team.tableros && (
-                                <ul className="ml-10 mt-1 space-y-1 text-sm text-white/80">
-                                    {team.tableros.map((tab) => (
-                                        <li key={tab.id_tablero} className="flex items-center gap-2">
-                                            <LayoutDashboard className="text-orange-400" size={16} />
-                                            <NavLink to={`/tablero/${tab.id_tablero}`}>
-                                                {tab.titulo}
+                            {selectedTeamId === team.id && team.archivos && (
+                                <ul className="ml-8 mt-0.5 space-y-0.5 text-white/85">
+                                    {team.archivos.map((arc) => (
+                                        <li key={arc.id_archivo} className="flex items-center gap-1.5">
+                                            {arc.tipo === 'word'
+                                                ? <FileText className="text-indigo-400 h-3.5 w-3.5" />
+                                                : arc.tipo === 'excel'
+                                                    ? <FileSpreadsheet className="text-green-400 h-3.5 w-3.5" />
+                                                    : <LayoutDashboard className="text-orange-400 h-3.5 w-3.5" />
+                                            }
+                                            <NavLink to={`/${arc.tipo}/${arc.id_archivo}`} className="text-[12px] hover:underline truncate">
+                                                {arc.titulo}
                                             </NavLink>
                                         </li>
                                     ))}
                                 </ul>
                             )}
-
                         </li>
                     ))}
-                    <li className="px-4 py-2 text-sm text-blue-300 hover:text-white cursor-pointer">
+
+                    <li className="px-3 py-1.5 text-[12px] text-blue-300 hover:text-white cursor-pointer">
                         {showInput ? (
                             <input
                                 autoFocus
@@ -224,13 +164,13 @@ export default function MenuEquipo({ open }) {
                                     if (e.key === "Enter") crearEquipo();
                                     if (e.key === "Escape") setShowInput(false);
                                 }}
-                                placeholder="Nombre del grupo"
-                                className="bg-transparent border-b border-blue-300 outline-none text-white"
+                                placeholder="Nombre del equipo"
+                                className="bg-transparent border-b border-blue-300 outline-none text-white text-[12px] w-full"
                             />
                         ) : (
-                            <span onClick={() => setShowInput(true)} className="flex items-center">
-                                <FolderPlus className="mr-2" />
-                                Crear nuevo grupo
+                            <span onClick={() => setShowInput(true)} className="flex items-center gap-1.5">
+                                <FolderPlus className="h-4 w-4" />
+                                Crear nuevo equipo
                             </span>
                         )}
                     </li>

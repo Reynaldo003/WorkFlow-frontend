@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { UserPlus } from "lucide-react";
 
-export default function Invitar() {
+export default function TableroNuevo() {
     const [showModal, setShowModal] = useState(false);
     const [email, setEmail] = useState("");
     const [nombre, setNombre] = useState("");
@@ -37,48 +37,8 @@ export default function Invitar() {
         fetchTeams();
     }, [token]);
 
-    const enviarInvitacion = async () => {
-        if (!email || !equipoSeleccionado) return alert("Selecciona un equipo e introduce un correo");
-        try {
-            const res = await fetch(
-                `http://127.0.0.1:8000/invitar/${equipoSeleccionado}`,
-                //`https://workflow-backend-production-991d.up.railway.app/invitar/${equipoSeleccionado}`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", Authorization: `Token ${token}` },
-                    body: JSON.stringify({ email, nombre, apellido }),
-                }
-            );
-            const json = await res.json();
-            if (!res.ok) {
-                console.error(json);
-                return alert("Error: " + (json.message || JSON.stringify(json)));
-            }
-            alert("Invitación enviada correctamente");
-            setEmail("");
-            setNombre("");
-            setApellido("");
-            setEquipoSeleccionado("");
-            setShowModal(false);
-        } catch (err) {
-            console.error(err);
-            alert("Error al enviar la invitación");
-        }
-    };
-
     return (
         <>
-            <button
-                className="flex items-center gap-1.5 text-xs md:text-sm px-3 py-1.5 rounded-lg shadow-sm ring-1 ring-black/10
-                   bg-[#11192E] text-white hover:brightness-110
-                   dark:bg-white dark:text-[#11192E] dark:hover:bg-white/90 dark:ring-white/20"
-                onClick={() => setShowModal(true)}
-                title="Invitar usuario"
-            >
-                <UserPlus className="w-4 h-4" />
-                <span className="hidden sm:inline">Invitar</span>
-            </button>
-
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
                     <div className="w-full max-w-md rounded-xl bg-white p-4 shadow-xl dark:bg-[#0F1A34]">

@@ -1,0 +1,18 @@
+/* Tipografía/estilos tipo Word */
+.tiptap h1 { font-size: 2rem; line-height: 1.2; font-weight: 700; margin: 1.2em 0 .6em }
+.tiptap h2 { font-size: 1.75rem; line-height: 1.25; font-weight: 700; margin: 1.1em 0 .55em }
+.tiptap h3 { font-size: 1.5rem; line-height: 1.3; font-weight: 600; margin: 1em 0 .5em }
+.tiptap h4 { font-size: 1.25rem; font-weight: 600; margin: .9em 0 .45em }
+.tiptap h5 { font-size: 1.125rem; font-weight: 600; margin: .8em 0 .4em }
+.tiptap h6 { font-size: 1rem; font-weight: 600; letter-spacing: .02em; margin: .7em 0 .35em }
+.tiptap p { line-height: 1.75 }
+.tiptap ul { list-style: disc; margin: .5em 0; padding-left: 1.5em }
+.tiptap ol { list-style: decimal; margin: .5em 0; padding-left: 1.5em }
+.tiptap blockquote { border-left: 4px solid rgb(180 180 180); padding-left: 1rem; font-style: italic; opacity: .95; margin: 1em 0 }
+.tiptap hr { border: none; border-top: 1px solid rgb(220 220 220); margin: 1.25rem 0 }
+.tiptap img { max-width: 100%; height: auto; border-radius: .5rem }
+
+/* Alineación */
+.tiptap [style*="text-align:center"] { display: block; }
+.tiptap [style*="text-align:right"] { display: block; }
+.tiptap [style*="text-align:justify"] { display: block; text-align: justify; text-justify: inter-word }

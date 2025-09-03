@@ -2,11 +2,15 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Bouncy } from 'ldrs/react'
-import 'ldrs/react/Bouncy.css'
+import { Bouncy } from "ldrs/react";
+import "ldrs/react/Bouncy.css";
 
-function LoginRegistro() {
-    const [mostrarLogin, setMostrarLogin] = useState(true);
+export default function LoginRegistro() {
+    const [tab, setTab] = useState("registro"); // "login" | "registro"
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+
     const [formLogin, setFormLogin] = useState({ usuario: "", contrasena: "" });
     const [formRegistro, setFormRegistro] = useState({
         nombre: "",
@@ -15,27 +19,28 @@ function LoginRegistro() {
         email: "",
         contrasena: "",
         contrasenaConfirmada: "",
-        id_rol: 2
+        id_rol: 2,
     });
-    const [showPassword, setShowPassword] = useState(false);
-    const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
-
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        const res = await fetch("https://workflow-backend-production-991d.up.railway.app/login/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ usuario: formLogin.usuario, contrasena: formLogin.contrasena }),
-        });
-        const data = await res.json();
-        if (res.status === 200) {
-            localStorage.setItem("token", data.token);
-            navigate("/");
-        } else {
-            alert("Error: " + (data.detail || "credenciales inválidas"));
+        try {
+            const res = await fetch("http://127.0.0.1:8000/login/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formLogin),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem("token", data.token);
+                navigate("/");
+            } else {
+                alert("Error: " + (data.detail || "credenciales inválidas"));
+            }
+        } catch (err) {
+            alert("No se pudo iniciar sesión.");
+        } finally {
             setIsLoading(false);
         }
     };
@@ -46,219 +51,269 @@ function LoginRegistro() {
             alert("Las contraseñas no coinciden");
             return;
         }
-        const res = await fetch("https://workflow-backend-production-991d.up.railway.app/register/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                usuario: formRegistro.usuario,
-                correo: formRegistro.email,
-                contrasena: formRegistro.contrasena,
-                nombre: formRegistro.nombre,
-                apellido: formRegistro.apellido,
-                id_rol: formRegistro.id_rol
-            }),
-        });
-        const data = await res.json();
-        if (res.status === 201) {
-            alert("Registro exitoso, ahora puedes iniciar sesión");
-            setMostrarLogin(true);
-        } else {
-            alert("Error: " + JSON.stringify(data));
+        try {
+            const res = await fetch("http://127.0.0.1:8000/register/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    usuario: formRegistro.usuario,
+                    correo: formRegistro.email,
+                    contrasena: formRegistro.contrasena,
+                    nombre: formRegistro.nombre,
+                    apellido: formRegistro.apellido,
+                    id_rol: formRegistro.id_rol,
+                }),
+            });
+            const data = await res.json();
+            if (res.status === 201) {
+                alert("Registro exitoso, ahora puedes iniciar sesión");
+                setTab("login");
+            } else {
+                alert("Error: " + JSON.stringify(data));
+            }
+        } catch {
+            alert("No se pudo completar el registro.");
         }
     };
 
     return (
-
-        <div className=" bg-gradient-to-br from-[#314b8f] to-[#0f2866] min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden">
-            <div className="relative w-full max-w-4xl h-[550px] bg-white shadow-2xl rounded-xl overflow-hidden">
-                <motion.div
-                    initial={false}
-                    animate={{ x: mostrarLogin ? "12.5%" : "-38%" }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute top-0 left-0 w-[200%] h-full grid grid-cols-2"
-                >
-                    <div className="flex flex-col justify-center items-center px-6 sm:px-8">
-                        <h2 className="text-2xl font-bold text-[#11192E] mb-6 text-center">Iniciar sesión</h2>
-                        <form onSubmit={handleLogin} className="w-full max-w-xs space-y-5">
-                            <input
-                                type="text"
-                                placeholder="Usuario"
-                                className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-[#005072]"
-                                value={formLogin.usuario}
-                                onChange={(e) => setFormLogin({ ...formLogin, usuario: e.target.value })}
-                                required
-                            />
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Contraseña"
-                                    className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-[#005072]"
-                                    value={formLogin.contrasena}
-                                    onChange={(e) => setFormLogin({ ...formLogin, contrasena: e.target.value })}
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    className="absolute right-3 top-4 text-gray-600"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
-                            </div>
-                            <button
-                                type="submit"
-                                className="w-full bg-[#11192E] text-white p-3 rounded hover:bg-[#0074a8] transition"
-                            >
-                                Iniciar sesión
-                            </button>
-                            <p className="text-sm text-center text-[#11192E] cursor-pointer hover:underline" onClick={() => setMostrarLogin(false)}>
-                                ¿No tienes cuenta? Registrate
-                            </p>
-                        </form>
+        <div className="min-h-screen bg-gradient-to-br from-[#314b8f] to-[#0f2866] flex items-center justify-center px-4 py-8">
+            <div className="relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                    {/* Panel de marca (solo md+) */}
+                    <div className="hidden md:flex flex-col items-center justify-center bg-[#11192E] text-white p-10">
+                        <motion.img
+                            src="/ryr.png"
+                            className="w-24 mb-6"
+                            alt="Logo"
+                            animate={{ rotate: [0, 8, -8, 0] }}
+                            transition={{ repeat: Infinity, repeatDelay: 8, duration: 2 }}
+                        />
+                        <p className="text-center text-sm leading-relaxed max-w-xs">
+                            {tab === "login"
+                                ? "Bienvenido de nuevo. Ingresa con tus credenciales para continuar."
+                                : "Crea una cuenta para acceder al CRM y gestionar tus prospectos."}
+                        </p>
                     </div>
 
-                    <div className="flex flex-col justify-center items-center px-6 sm:px-8">
-                        <h2 className="mt-0 text-2xl font-bold text-[#11192E] mb-0 text-center">Crear cuenta</h2>
-                        <form onSubmit={handleRegistro} className="w-full max-w-md mx-auto space-y-6 pt-7 pl-10 pr-10">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <input
-                                        type="text"
-                                        placeholder="Nombre(s)"
-                                        className="w-full py-2 px-3 border text-base rounded focus:outline-none focus:ring-2 focus:ring-[#005072]"
-                                        value={formRegistro.nombre}
-                                        onChange={(e) => setFormRegistro({ ...formRegistro, nombre: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <input
-                                        type="text"
-                                        placeholder="Apellidos"
-                                        className="w-full py-2 px-3 border text-base rounded focus:outline-none focus:ring-2 focus:ring-[#005072]"
-                                        value={formRegistro.apellido}
-                                        onChange={(e) => setFormRegistro({ ...formRegistro, apellido: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <input
-                                    type="text"
-                                    placeholder="Usuario"
-                                    className="w-full py-2 px-3 border text-base rounded focus:outline-none focus:ring-2 focus:ring-[#005072]"
-                                    value={formRegistro.usuario}
-                                    onChange={(e) => setFormRegistro({ ...formRegistro, usuario: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <input
-                                    type="email"
-                                    placeholder="Correo electrónico"
-                                    className="w-full py-2 px-3 border text-base rounded focus:outline-none focus:ring-2 focus:ring-[#005072]"
-                                    value={formRegistro.email}
-                                    onChange={(e) => setFormRegistro({ ...formRegistro, email: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <select
-                                    value={formRegistro.id_rol}
-                                    className="w-full py-2 px-3 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-[#005072]"
-                                    onChange={(e) => setFormRegistro({ ...formRegistro, id_rol: parseInt(e.target.value) })}
+                    {/* Contenido: tabs + formulario */}
+                    <div className="p-6 sm:p-8">
+                        {/* Tabs (visible en móvil y desktop) */}
+                        <div className="flex items-center justify-center mb-6">
+                            <div className="inline-flex rounded-xl border border-gray-200 bg-gray-100 p-1">
+                                <button
+                                    className={`px-4 py-2 text-sm rounded-lg transition ${tab === "login"
+                                        ? "bg-white shadow text-[#11192E] font-semibold"
+                                        : "text-gray-600 hover:text-gray-900"
+                                        }`}
+                                    onClick={() => setTab("login")}
                                 >
-                                    <option value={1}>Administrador</option>
-                                    <option value={2}>Miembro</option>
-                                    <option value={3}>Espectador</option>
-                                    <option value={4}>Invitado</option>
-                                </select>
+                                    Iniciar sesión
+                                </button>
+                                <button
+                                    className={`px-4 py-2 text-sm rounded-lg transition ${tab === "registro"
+                                        ? "bg-white shadow text-[#11192E] font-semibold"
+                                        : "text-gray-600 hover:text-gray-900"
+                                        }`}
+                                    onClick={() => setTab("registro")}
+                                >
+                                    Crear cuenta
+                                </button>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="relative">
+                        </div>
+
+                        {tab === "login" ? (
+                            <form onSubmit={handleLogin} className="mx-auto w-full max-w-md space-y-4">
+                                <h2 className="text-center text-2xl font-bold text-[#11192E]">Iniciar sesión</h2>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Usuario</label>
                                     <input
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Contraseña"
-                                        className="w-full py-2 px-3 border text-base rounded focus:outline-none focus:ring-2 focus:ring-[#005072] pr-10"
-                                        value={formRegistro.contrasena}
-                                        onChange={(e) => setFormRegistro({ ...formRegistro, contrasena: e.target.value })}
+                                        type="text"
+                                        value={formLogin.usuario}
+                                        onChange={(e) => setFormLogin({ ...formLogin, usuario: e.target.value })}
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#11192E]/70"
+                                        placeholder="Tu usuario"
                                         required
                                     />
-                                    <button
-                                        type="button"
-                                        className="absolute right-3 top-2.5 text-gray-600"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                    </button>
                                 </div>
 
                                 <div className="relative">
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Contraseña</label>
                                     <input
                                         type={showPassword ? "text" : "password"}
-                                        placeholder="Confirmar contraseña"
-                                        className="w-full py-2 px-3 border text-base rounded focus:outline-none focus:ring-2 focus:ring-[#005072] pr-10"
-                                        value={formRegistro.contrasenaConfirmada}
-                                        onChange={(e) => setFormRegistro({ ...formRegistro, contrasenaConfirmada: e.target.value })}
+                                        value={formLogin.contrasena}
+                                        onChange={(e) => setFormLogin({ ...formLogin, contrasena: e.target.value })}
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#11192E]/70"
+                                        placeholder="••••••••"
                                         required
                                     />
                                     <button
                                         type="button"
-                                        className="absolute right-3 top-2.5 text-gray-600"
-                                        onClick={() => setShowPassword(!showPassword)}
+                                        onClick={() => setShowPassword((s) => !s)}
+                                        className="absolute right-3 top-[30px] text-gray-600"
+                                        aria-label="Mostrar/ocultar contraseña"
                                     >
-                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
                                 </div>
-                            </div>
-                            <div className="space-y-4">
+
                                 <button
                                     type="submit"
-                                    className="w-full bg-[#11192E] text-white py-2 rounded hover:bg-[#0074a8] transition"
+                                    className="w-full rounded-lg bg-[#11192E] py-2 text-sm font-semibold text-white hover:brightness-110"
+                                >
+                                    Iniciar sesión
+                                </button>
+
+                                <p className="text-center text-xs">
+                                    ¿No tienes cuenta?{" "}
+                                    <button
+                                        type="button"
+                                        onClick={() => setTab("registro")}
+                                        className="text-[#11192E] underline underline-offset-2"
+                                    >
+                                        Regístrate
+                                    </button>
+                                </p>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleRegistro} className="mx-auto w-full max-w-lg space-y-4">
+                                <h2 className="text-center text-2xl font-bold text-[#11192E]">Crear cuenta</h2>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Nombre(s)</label>
+                                        <input
+                                            type="text"
+                                            value={formRegistro.nombre}
+                                            onChange={(e) => setFormRegistro({ ...formRegistro, nombre: e.target.value })}
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#11192E]/70"
+                                            placeholder="Juan"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Apellidos</label>
+                                        <input
+                                            type="text"
+                                            value={formRegistro.apellido}
+                                            onChange={(e) => setFormRegistro({ ...formRegistro, apellido: e.target.value })}
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#11192E]/70"
+                                            placeholder="Pérez"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Usuario</label>
+                                    <input
+                                        type="text"
+                                        value={formRegistro.usuario}
+                                        onChange={(e) => setFormRegistro({ ...formRegistro, usuario: e.target.value })}
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#11192E]/70"
+                                        placeholder="usuario123"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Correo electrónico</label>
+                                    <input
+                                        type="email"
+                                        value={formRegistro.email}
+                                        onChange={(e) => setFormRegistro({ ...formRegistro, email: e.target.value })}
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#11192E]/70"
+                                        placeholder="tucorreo@dominio.com"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Rol</label>
+                                    <select
+                                        value={formRegistro.id_rol}
+                                        onChange={(e) => setFormRegistro({ ...formRegistro, id_rol: parseInt(e.target.value) })}
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#11192E]/70"
+                                    >
+                                        <option value={1}>Administrador</option>
+                                        <option value={2}>Miembro</option>
+                                        <option value={3}>Espectador</option>
+                                        <option value={4}>Invitado</option>
+                                    </select>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="relative">
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Contraseña</label>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            value={formRegistro.contrasena}
+                                            onChange={(e) => setFormRegistro({ ...formRegistro, contrasena: e.target.value })}
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#11192E]/70"
+                                            placeholder="••••••••"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword((s) => !s)}
+                                            className="absolute right-3 top-[30px] text-gray-600"
+                                            aria-label="Mostrar/ocultar contraseña"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                    <div className="relative">
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Confirmar contraseña</label>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            value={formRegistro.contrasenaConfirmada}
+                                            onChange={(e) =>
+                                                setFormRegistro({ ...formRegistro, contrasenaConfirmada: e.target.value })
+                                            }
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#11192E]/70"
+                                            placeholder="••••••••"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword((s) => !s)}
+                                            className="absolute right-3 top-[30px] text-gray-600"
+                                            aria-label="Mostrar/ocultar contraseña"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="w-full rounded-lg bg-[#11192E] py-2 text-sm font-semibold text-white hover:brightness-110"
                                 >
                                     Registrarse
                                 </button>
-                                <p
-                                    className="text-sm text-center text-[#11192E] cursor-pointer hover:underline"
-                                    onClick={() => setMostrarLogin(true)}
-                                >
-                                    ¿Ya tienes cuenta? Inicia sesión
-                                </p>
-                            </div>
-                        </form>
 
+                                <p className="text-center text-xs">
+                                    ¿Ya tienes cuenta?{" "}
+                                    <button
+                                        type="button"
+                                        onClick={() => setTab("login")}
+                                        className="text-[#11192E] underline underline-offset-2"
+                                    >
+                                        Inicia sesión
+                                    </button>
+                                </p>
+                            </form>
+                        )}
                     </div>
-                </motion.div>
-                {
-                    isLoading && (
-                        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white bg-opacity-75">
-                            <Bouncy size="45" speed="1.55" color="#11192E" />
-                        </div>
-                    )
-                }
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="z-10 absolute top-0 w-1/2 h-full bg-[#11192E] text-white flex flex-col justify-center items-center px-6 sm:px-10 transition-all duration-500"
-                    style={{ left: mostrarLogin ? "0%" : "0%" }}
-                >
-                    <motion.img
-                        src="/ryr.png"
-                        className="w-28 mb-6"
-                        alt="Logo RYR"
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ repeat: Infinity, repeatDelay: 8, duration: 2 }}
-                    />
-                    <p className="text-center text-base leading-relaxed max-w-xs">
-                        {mostrarLogin
-                            ? "Bienvenido de nuevo. Ingresa con tus credenciales para continuar."
-                            : "Crea una cuenta para acceder al CRM y gestionar tus prospectos."}
-                    </p>
-                </motion.div>
+                </div>
+
+                {isLoading && (
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80">
+                        <Bouncy size="45" speed="1.55" color="#11192E" />
+                    </div>
+                )}
             </div>
         </div>
     );
 }
-
-export default LoginRegistro;
