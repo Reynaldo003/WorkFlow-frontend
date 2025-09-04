@@ -125,7 +125,7 @@ export default function Perfil() {
             });
             setEditing(false);
         } catch (e) {
-            alert("No se pudo guardar. " + (e.message || ""));
+            alert("No se pudo guardar. Verifique la longitud (minimo 8 caracteres). No sea completamente numerica. Contenga 2 Caracteres Especiales." + e.message);
         }
     };
 
