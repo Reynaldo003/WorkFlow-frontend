@@ -26,7 +26,8 @@ export default function LoginRegistro() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const res = await fetch("http://127.0.0.1:8000/login/", {
+            //const res = await fetch("http://127.0.0.1:8000/login/", {
+            const res = await fetch("https://workflow-backend-production-991d.up.railway.app/login/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formLogin),
@@ -52,7 +53,8 @@ export default function LoginRegistro() {
             return;
         }
         try {
-            const res = await fetch("http://127.0.0.1:8000/register/", {
+            //const res = await fetch("http://127.0.0.1:8000/register/", {
+            const res = await fetch("https://workflow-backend-production-991d.up.railway.app/register/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

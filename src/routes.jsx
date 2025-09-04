@@ -16,12 +16,12 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
       <Route path="/loginregistro" element={<LoginRegistro />} />
-      <Route path="/Perfil" element={<Perfil />} />
-      <Route path="/Integraciones" element={<Integracion />} />
+      <Route path="/Perfil" element={<RequireAuth><Perfil /></RequireAuth>} />
+      <Route path="/Integraciones" element={<RequireAuth><Integracion /></RequireAuth>} />
       <Route path="/automatizaciones" element={<RequireAuth><Automatizaciones /></RequireAuth>} />
-      <Route path="/excel/:idArchivo" element={<Excel />} />
-      <Route path="/word/:idArchivo" element={<Word />} />
-      <Route path="/powerbi/nuevo" element={<Powerbi />} />
+      <Route path="/excel/:idArchivo" element={<RequireAuth><Excel /></RequireAuth>} />
+      <Route path="/word/:idArchivo" element={<RequireAuth><Word /></RequireAuth>} />
+      <Route path="/powerbi/nuevo" element={<RequireAuth><Powerbi /></RequireAuth>} />
       <Route path="/tablero/:idTablero" element={<RequireAuth><Tablero /></RequireAuth>} />
       <Route path="/logout" element={<Logout />} />
     </Routes>

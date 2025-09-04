@@ -381,7 +381,8 @@ export default function RichTextEditor() {
         content: "",
         editorProps: { attributes: { class: 'tiptap min-h-[360px] outline-none' } },
         onUpdate: ({ editor }) => {
-            fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/estructura/`, {
+            //fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/estructura/`, {
+            fetch(`https://workflow-backend-production-991d.up.railway.app/archivo/${idArchivo}/estructura/`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -392,7 +393,8 @@ export default function RichTextEditor() {
         }
     });
     useEffect(() => {
-        fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/`, {
+        //fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/`, {
+        fetch(`https://workflow-backend-production-991d.up.railway.app/archivo/${idArchivo}/`, {
             headers: { "Authorization": `Token ${token}` }
         })
             .then(res => res.json())

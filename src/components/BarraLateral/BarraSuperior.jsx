@@ -27,7 +27,8 @@ export default function BarraSuperior() {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) return;
-        fetch(`http://127.0.0.1:8000/profile/`, { headers: { Authorization: `Token ${token}` } })
+        //fetch(`http://127.0.0.1:8000/profile/`, { headers: { Authorization: `Token ${token}` } })
+        fetch(`https://workflow-backend-production-991d.up.railway.app/profile/`, { headers: { Authorization: `Token ${token}` } })
             .then((r) => (r.ok ? r.json() : Promise.reject()))
             .then((d) =>
                 setUser({

@@ -14,14 +14,16 @@ export default function MenuEquipo({ open }) {
     const fetchTeams = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:8000/lista_equipos/`, {
+            //const res = await fetch(`http://127.0.0.1:8000/lista_equipos/`, {
+            const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/lista_equipos/`, {
                 headers: { Authorization: `Token ${token}` },
             });
             const data = await res.json();
 
             const equiposConArchivos = await Promise.all(
                 data.equipos.map(async (eq) => {
-                    const archivosRes = await fetch(`http://127.0.0.1:8000/equipos/${eq.id_equipo}/tableros/`, {
+                    //const archivosRes = await fetch(`http://127.0.0.1:8000/equipos/${eq.id_equipo}/tableros/`, {
+                    const archivosRes = await fetch(`https://workflow-backend-production-991d.up.railway.app/equipos/${eq.id_equipo}/tableros/`, {
                         headers: { Authorization: `Token ${token}` },
                     });
                     const archivosData = await archivosRes.json();
@@ -45,7 +47,8 @@ export default function MenuEquipo({ open }) {
     const crearArchivo = async (tipo, idEquipo) => {
         const titulo = prompt(`Título del ${tipo}:`) || `Nuevo ${tipo}`;
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://127.0.0.1:8000/archivo/`, {
+        //const res = await fetch(`http://127.0.0.1:8000/archivo/`, {
+        const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/archivo/`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Token ${token}` },
             body: JSON.stringify({ tipo, titulo, id_equipo: idEquipo }),
@@ -64,7 +67,8 @@ export default function MenuEquipo({ open }) {
         if (!newTeamName.trim()) return;
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:8000/cequipo/", {
+            //const res = await fetch("http://127.0.0.1:8000/cequipo/", {
+            const res = await fetch("https://workflow-backend-production-991d.up.railway.app/cequipo/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

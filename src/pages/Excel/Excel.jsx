@@ -26,6 +26,7 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
     const saveTimer = useRef(null);
 
     const guardarEstructura = async (nuevasSheets) => {
+        //await fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/estructura/`, {
         await fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/estructura/`, {
             method: "PATCH",
             headers: {
@@ -46,7 +47,8 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const res = await fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/`, {
+            //const res = await fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/`, {
+            const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/archivo/${idArchivo}/`, {
                 headers: { Authorization: `Token ${token}` },
             });
             const data = await res.json();
@@ -225,8 +227,8 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
                             <div
                                 key={s.id}
                                 className={`group flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer ${i === activeIdx
-                                        ? "bg-yellow-400/20 border-yellow-500 text-yellow-800 dark:text-yellow-300"
-                                        : "bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                                    ? "bg-yellow-400/20 border-yellow-500 text-yellow-800 dark:text-yellow-300"
+                                    : "bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700"
                                     }`}
                                 onClick={() => setActiveIdx(i)}
                                 title={s.name}

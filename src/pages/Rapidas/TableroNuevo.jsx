@@ -13,16 +13,16 @@ export default function TableroNuevo() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const res = await fetch("http://127.0.0.1:8000/lista_equipos", {
-                    //const res = await fetch("https://workflow-backend-production-991d.up.railway.app/lista_equipos/", {
+                //const res = await fetch("http://127.0.0.1:8000/lista_equipos", {
+                const res = await fetch("https://workflow-backend-production-991d.up.railway.app/lista_equipos/", {
                     headers: { Authorization: `Token ${token}` },
                 });
                 const data = await res.json();
                 const equiposConTableros = await Promise.all(
                     data.equipos.map(async (eq) => {
                         const resTabs = await fetch(
-                            `http://127.0.0.1:8000/equipos/${eq.id_equipo}/tableros/`,
-                            //`https://workflow-backend-production-991d.up.railway.app/equipos/${eq.id_equipo}/tableros/`,
+                            //`http://127.0.0.1:8000/equipos/${eq.id_equipo}/tableros/`,
+                            `https://workflow-backend-production-991d.up.railway.app/equipos/${eq.id_equipo}/tableros/`,
                             { headers: { Authorization: `Token ${token}` } }
                         );
                         const tabsData = await resTabs.json();

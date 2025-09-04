@@ -39,7 +39,8 @@ export default function Perfil() {
     const fetchProfile = async () => {
         setState({ loading: true, error: "" });
         try {
-            const res = await fetch(`http://127.0.0.1:8000/profile/`, {
+            //const res = await fetch(`http://127.0.0.1:8000/profile/`, {
+            const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/profile/`, {
                 headers: { Authorization: `Token ${token}` },
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -74,7 +75,8 @@ export default function Perfil() {
     const fetchRolesIfNeeded = async () => {
         if (!isAdmin) return;
         try {
-            const res = await fetch(`http://127.0.0.1:8000/roles/`, {
+            //const res = await fetch(`http://127.0.0.1:8000/roles/`, {
+            const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/roles/`, {
                 headers: { Authorization: `Token ${token}` },
             });
             if (res.ok) {
@@ -98,7 +100,8 @@ export default function Perfil() {
         }
 
         try {
-            const res = await fetch(`http://127.0.0.1:8000/profile/`, {
+            //const res = await fetch(`http://127.0.0.1:8000/profile/`, {
+            const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/profile/`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
