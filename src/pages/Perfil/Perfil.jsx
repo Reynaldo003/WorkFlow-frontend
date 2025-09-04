@@ -10,11 +10,11 @@ export default function Perfil() {
         apellido: "",
         correo: "",
         usuario: "",
+        contrasena: "",
         id_rol: "",
     });
     const [roles, setRoles] = useState([]);
 
-    // Sidebar awareness (igual que tu versión)
     const SIDEBAR_EXPANDED = 256;
     const SIDEBAR_COLLAPSED = 64;
     const [sidebarOpen, setSidebarOpen] = useState(
@@ -39,8 +39,8 @@ export default function Perfil() {
     const fetchProfile = async () => {
         setState({ loading: true, error: "" });
         try {
-            //const res = await fetch(`http://127.0.0.1:8000/profile/`, {
-            const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/profile/`, {
+            const res = await fetch(`http://127.0.0.1:8000/profile/`, {
+                //const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/profile/`, {
                 headers: { Authorization: `Token ${token}` },
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -51,6 +51,7 @@ export default function Perfil() {
                 apellido: data.apellido || "",
                 correo: data.correo || data.email || "",
                 usuario: data.usuario || "",
+                contrasena: data.contrasena || "",
                 id_rol: data.id_rol || "",
             });
         } catch (e) {
@@ -69,14 +70,13 @@ export default function Perfil() {
             return;
         }
         fetchProfile();
-    }, []); // eslint-disable-line
+    }, []);
 
-    // Cargar roles solo si el usuario es admin y entra a modo edición
     const fetchRolesIfNeeded = async () => {
         if (!isAdmin) return;
         try {
-            //const res = await fetch(`http://127.0.0.1:8000/roles/`, {
-            const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/roles/`, {
+            const res = await fetch(`http://127.0.0.1:8000/roles/`, {
+                //const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/roles/`, {
                 headers: { Authorization: `Token ${token}` },
             });
             if (res.ok) {
@@ -84,7 +84,6 @@ export default function Perfil() {
                 setRoles(lista);
             }
         } catch {
-            /* opcional: mostrar error silencioso */
         }
     };
 
@@ -93,6 +92,7 @@ export default function Perfil() {
             nombre: form.nombre,
             apellido: form.apellido,
             usuario: form.usuario,
+            contrasena: form.contrasena,
             correo: form.correo,
         };
         if (isAdmin && form.id_rol) {
@@ -100,8 +100,8 @@ export default function Perfil() {
         }
 
         try {
-            //const res = await fetch(`http://127.0.0.1:8000/profile/`, {
-            const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/profile/`, {
+            const res = await fetch(`http://127.0.0.1:8000/profile/`, {
+                //const res = await fetch(`https://workflow-backend-production-991d.up.railway.app/profile/`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -120,6 +120,7 @@ export default function Perfil() {
                 apellido: updated.apellido || "",
                 correo: updated.correo || "",
                 usuario: updated.usuario || "",
+                contrasena: updated.contrasena || "",
                 id_rol: updated.id_rol || "",
             });
             setEditing(false);
@@ -136,7 +137,6 @@ export default function Perfil() {
             <h1 className="text-2xl font-semibold mb-4">Mi perfil</h1>
 
             <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/60 p-5 space-y-4">
-                {/* Header */}
                 <div className="flex items-center gap-3">
                     <div className="h-12 w-12 rounded-full dark:bg-neutral-400 dark:text-neutral-800 bg-[#11192E] text-white grid place-items-center font-semibold">
                         {(user?.nombre?.[0] || "U") + (user?.apellido?.[0] || "")}
@@ -165,12 +165,12 @@ export default function Perfil() {
                                 <button
                                     onClick={() => {
                                         setEditing(false);
-                                        // Restablecer formulario a datos actuales
                                         setForm({
                                             nombre: user?.nombre || "",
                                             apellido: user?.apellido || "",
                                             correo: user?.correo || user?.email || "",
                                             usuario: user?.usuario || "",
+                                            contrasena: user?.contrasena || "",
                                             id_rol: user?.id_rol || "",
                                         });
                                     }}
@@ -189,11 +189,13 @@ export default function Perfil() {
                     </div>
                 </div>
 
-                {/* Body */}
                 {!editing ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                         <p>
                             <span className="font-medium">Usuario:</span> {user?.usuario || "—"}
+                        </p>
+                        <p>
+                            <span className="font-medium">Contrasena:</span> {"—"}
                         </p>
                         <p>
                             <span className="font-medium">Rol:</span>{" "}
@@ -236,6 +238,17 @@ export default function Perfil() {
                                 onChange={(e) => setForm({ ...form, usuario: e.target.value })}
                             />
                         </label>
+
+                        <label className="grid gap-1 text-sm">
+                            <span className="text-zinc-600 dark:text-zinc-400">Contrasena</span>
+                            <input
+                                type="password"
+                                className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white/60 dark:bg-zinc-900/60 px-3 py-2"
+                                value={form.contrasena}
+                                onChange={(e) => setForm({ ...form, contrasena: e.target.value })}
+                            />
+                        </label>
+
                         <label className="grid gap-1 text-sm">
                             <span className="text-zinc-600 dark:text-zinc-400">Correo</span>
                             <input
@@ -246,7 +259,6 @@ export default function Perfil() {
                             />
                         </label>
 
-                        {/* Rol */}
                         <label className="grid gap-1 text-sm sm:col-span-2">
                             <span className="text-zinc-600 dark:text-zinc-400">Rol</span>
 
