@@ -1,4 +1,3 @@
-// src/pages/Excel/Excel.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { HotTable } from "@handsontable/react";
 import "handsontable/dist/handsontable.full.min.css";
@@ -58,20 +57,17 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
                 : [DEFAULT_SHEET];
             setSheets(loaded);
             setActiveIdx(0);
-            // Si el backend venía sin estructura, la inicializamos
             if (!data?.estructura?.sheets?.length) scheduleSave(loaded);
         })();
         return () => { cancelled = true; };
     }, [idArchivo, token]);
 
-    // Sidebar responsive
     useEffect(() => {
         const onToggle = (e) => setSidebarOpen(!!e.detail?.open);
         window.addEventListener("sidebar:toggle", onToggle);
         return () => window.removeEventListener("sidebar:toggle", onToggle);
     }, []);
 
-    // Recalcular dimensiones al redimensionar
     useEffect(() => {
         const onResize = () => hotRef.current?.hotInstance?.refreshDimensions();
         window.addEventListener("resize", onResize);
@@ -82,7 +78,6 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
         };
     }, []);
 
-    // Utilidad para aplicar cambios y guardar
     const applyAndSave = (updater) => {
         setSheets((prev) => {
             const next = typeof updater === "function" ? updater(prev) : updater;
@@ -138,7 +133,6 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
     const addSheet = () => {
         applyAndSave((prev) => {
             const next = [...prev, { id: crypto.randomUUID(), name: `Hoja ${prev.length + 1}`, data: [[""]] }];
-            // Mueve el índice activo a la hoja nueva
             setActiveIdx(next.length - 1);
             return next;
         });
@@ -146,7 +140,7 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
 
     const removeSheet = (idx) => {
         applyAndSave((prev) => {
-            if (prev.length === 1) return prev; // no borrar la última
+            if (prev.length === 1) return prev;
             const next = prev.filter((_, i) => i !== idx);
             setActiveIdx((old) => Math.min(old, next.length - 1));
             return next;

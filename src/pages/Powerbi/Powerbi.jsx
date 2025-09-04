@@ -186,7 +186,6 @@ export default function Powerbi() {
                 ["error", (e) => setState({ loading: false, error: e?.detail || "Error en Power BI" })],
             ]),
             getEmbeddedComponent: (embeddedReport) => {
-                // guarda una referencia para usar .save(), .refresh(), .fullscreen()
                 embedRef.current = embeddedReport;
             },
             cssClassName:
@@ -203,7 +202,6 @@ export default function Powerbi() {
                 </p>
             </div>
 
-            {/* Selector de flujo */}
             <div className="mb-4 flex gap-2">
                 <button
                     onClick={() => setMode("import")}
@@ -219,7 +217,6 @@ export default function Powerbi() {
                 </button>
             </div>
 
-            {/* Formulario según flujo */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="md:col-span-1 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4">
                     <label className="grid gap-2">

@@ -1,4 +1,3 @@
-// src/pages/Perfil.jsx
 import { useEffect, useMemo, useState } from "react";
 
 export default function Perfil() {

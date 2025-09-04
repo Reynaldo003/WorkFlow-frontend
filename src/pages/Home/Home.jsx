@@ -405,7 +405,7 @@ export default function Home() {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <div className="xl:col-span-2 space-y-6">
                     <div>
-                        <SectionHeader title="Recientes" to="/recent" />
+                        <SectionHeader title="Recientes" to="/" />
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <ResourceList
                                 icon={<LayoutDashboard className="size-4" />}
@@ -467,7 +467,6 @@ export default function Home() {
                 </div>
             </div>
 
-            {/* Footer con Easter Egg */}
             <div className="mt-8 flex items-center justify-between text-xs text-zinc-500">
                 <div>v2.1.0</div>
                 <div className="flex items-center gap-3">

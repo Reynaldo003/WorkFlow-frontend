@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 function getInitials({ nombre, apellido, name, email }) {
-    // Construye tokens a partir de nombre+apellido; si no hay, usa name
     const tokens = [];
     if (typeof nombre === "string" && nombre.trim()) {
         tokens.push(...nombre.trim().split(/\s+/));
@@ -14,7 +13,6 @@ function getInitials({ nombre, apellido, name, email }) {
         tokens.push(...name.trim().split(/\s+/));
     }
 
-    // Toma las dos primeras iniciales disponibles
     const initials = tokens
         .filter(Boolean)
         .slice(0, 2)
@@ -36,13 +34,11 @@ export default function Avatar({ email = "usuario@correo.com", nombre, apellido,
         navigate(path);
     };
 
-    // Iniciales calculadas en memo (evita recomputar en cada render)
     const initials = useMemo(
         () => getInitials({ nombre, apellido, name, email }),
         [nombre, apellido, name, email]
     );
 
-    // Cierra el menú si se da clic fuera
     useEffect(() => {
         function handleClickOutside(event) {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -53,7 +49,6 @@ export default function Avatar({ email = "usuario@correo.com", nombre, apellido,
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Opcional: cerrar con ESC
     useEffect(() => {
         const onKey = (e) => e.key === "Escape" && setOpen(false);
         document.addEventListener("keydown", onKey);

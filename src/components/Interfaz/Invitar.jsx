@@ -42,7 +42,7 @@ export default function Invitar() {
         try {
             const res = await fetch(
                 //`http://127.0.0.1:8000/invitar/${equipoSeleccionado}`,
-                `https://workflow-backend-production-991d.up.railway.app/invitar/${equipoSeleccionado}`,
+                `https://workflow-backend-production-991d.up.railway.app/invitar/${equipoSeleccionado}/`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json", Authorization: `Token ${token}` },
@@ -98,7 +98,7 @@ export default function Invitar() {
                             ))}
                         </select>
 
-                        <label className="block text-xs mb-1 text-gray-600 dark:text-gray-300">Correo electrónico</label>
+                        <label className="block text-xs mb-1 text-gray-600 dark:text-gray-300">Correo electronico</label>
                         <input
                             type="email"
                             value={email}

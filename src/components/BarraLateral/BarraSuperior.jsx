@@ -15,7 +15,6 @@ export default function BarraSuperior() {
     const [q, setQ] = useState("");
     const searchRef = useRef(null);
 
-    // Sidebar compacta
     useEffect(() => {
         const handler = (e) => setCompact(!e.detail.open);
         window.addEventListener("sidebar:toggle", handler);
@@ -38,22 +37,6 @@ export default function BarraSuperior() {
                 })
             )
             .catch(() => { });
-    }, []);
-
-    // Atajos teclado
-    useEffect(() => {
-        const onKeyDown = (e) => {
-            if (e.key === "/" && document.activeElement !== searchRef.current) {
-                e.preventDefault();
-                searchRef.current?.focus();
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-                e.preventDefault();
-                window.dispatchEvent(new CustomEvent("command:open")); // integra tu paleta si la tienes
-            }
-        };
-        document.addEventListener("keydown", onKeyDown);
-        return () => document.removeEventListener("keydown", onKeyDown);
     }, []);
 
     const widthClass = compact ? "w-40 md:w-64" : "w-56 md:w-96";
@@ -96,7 +79,6 @@ export default function BarraSuperior() {
                 <Invitar />
                 <Notificationes />
 
-                {/* Estado tiempo real */}
                 <button
                     type="button"
                     className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/10"
@@ -107,14 +89,12 @@ export default function BarraSuperior() {
                     <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#11192E]" />
                 </button>
 
-                {/* Usuarios conectados */}
                 <div className="hidden lg:flex items-center gap-1.5">
                     {["Oswaldo", "Luis", "Jonathan"].map((nombre) => (
                         <Conectados key={nombre} name={nombre} />
                     ))}
                 </div>
 
-                {/* Avatar con iniciales del perfil */}
                 <Avatar
                     email={user?.correo || "usuario@correo.com"}
                     nombre={user?.nombre}

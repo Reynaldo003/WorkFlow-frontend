@@ -20,12 +20,6 @@ import {
 } from 'lucide-react';
 import { Icon } from 'lucide-react';
 import { underlineSquare } from '@lucide/lab';
-/**
- * NOTA IMPORTANTE:
- * - Asegúrate de que tu layout añada la clase `dark` en <html> cuando esté en modo oscuro.
- * - Para que se “vean” los H1–H6, listas y blockquote como Word, añade el bloque CSS de abajo a tu global CSS.
- */
-
 const extensions = [
     FontFamily,
     Color,
@@ -129,7 +123,6 @@ function FontFamilySelect({ editor }) {
 }
 
 function FontSizeSelect({ editor }) {
-    // Usa TextStyle con style font-size
     const sizes = ['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px']
     const apply = (size) => editor.chain().focus().setMark('textStyle', { fontSize: size }).run()
     const clear = () => editor.chain().focus().setMark('textStyle', { fontSize: null }).removeEmptyTextStyle().run()
@@ -353,20 +346,13 @@ function MenuBar({ editor }) {
     )
 }
 
-/**
- * Props:
- * - sidebarExpanded, sidebarWidthExpanded, sidebarWidthCollapsed: para adaptar al layout con sidebar
- * - initialContent: HTML inicial
- */
 export default function RichTextEditor() {
     const { idArchivo } = useParams();
     const token = localStorage.getItem("token");
 
-    // Alineado con tu sidebar (w-64 / w-16)
     const SIDEBAR_EXPANDED = 256
     const SIDEBAR_COLLAPSED = 64
 
-    // Detecta estado del sidebar
     const [sidebarOpen, setSidebarOpen] = useState(
         () => !document.documentElement.classList.contains('sidebar-collapsed')
     )
@@ -410,7 +396,6 @@ export default function RichTextEditor() {
 
     return (
         <div className="transition-[max-width] duration-300 ease-out" style={{ maxWidth: availableWidth, margin: '0 auto' }}>
-            {/* MenuBar idéntico al original */}
             {MenuBar({ editor })}
             <div className="mx-auto max-w-[min(1200px,100%)] px-3 pb-8">
                 <div className="rounded-2xl border shadow-sm bg-white text-neutral-900 border-neutral-200 dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-800">
