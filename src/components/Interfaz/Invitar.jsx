@@ -13,7 +13,7 @@ export default function Invitar() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                //const res = await fetch("http://127.0.0.1:8000/lista_equipos", {
+                //const res = await fetch("http://127.0.0.1:8000/lista_equipos/", {
                 const res = await fetch("https://workflow-backend-production-991d.up.railway.app/lista_equipos/", {
                     headers: { Authorization: `Token ${token}` },
                 });
@@ -41,7 +41,7 @@ export default function Invitar() {
         if (!email || !equipoSeleccionado) return alert("Selecciona un equipo e introduce un correo");
         try {
             const res = await fetch(
-                //`http://127.0.0.1:8000/invitar/${equipoSeleccionado}`,
+                //`http://127.0.0.1:8000/invitar/${equipoSeleccionado}/`,
                 `https://workflow-backend-production-991d.up.railway.app/invitar/${equipoSeleccionado}/`,
                 {
                     method: "POST",
