@@ -201,11 +201,11 @@ export default function Home() {
     }, [query]);
 
     const openResource = (kind, it) => {
-        if (kind === "board") navigate(`/boards/${it.id}`);
-        if (kind === "sheet") navigate(`/sheets/${it.id}`);
-        if (kind === "doc") navigate(`/docs/${it.id}`);
+        if (kind === "board") navigate(`/`);
+        if (kind === "sheet") navigate(`/`);
+        if (kind === "doc") navigate(`/`);
     };
-    const openTeam = (t) => navigate(`/teams/${t.id}`);
+    const openTeam = (t) => navigate(`/`);
 
     const WATERMARK_TEXT = "Desarrollado por Rey";
     const WATERMARK_URL = "www.google.com";
@@ -288,7 +288,7 @@ export default function Home() {
                                 </div>
                                 <img src={qrSrc} alt="QR" className="ml-28 mt-3 h-28 w-28 rounded-md ring-1 ring-zinc-200 dark:ring-zinc-800" />
 
-                                <p className="pt-2 pb-2 font-semibold text-xs text-justify">Este dashboard fue desarrollado como parte de mis practicas profesionales.</p>
+                                <p className="pt-2 pb-2 font-semibold text-xs text-justify">Proyecto R&R.</p>
                                 <p className="pt-2 pb-2 font-bold text-xs text-justify">· Stack:</p>
                                 <div className="pl-3 grid grid-cols-4 gap-5">
                                     <img src="/react.png" className="max-w-8" />
@@ -436,7 +436,7 @@ export default function Home() {
                     </div>
 
                     <div>
-                        <SectionHeader title="Automatizaciones (próximas)" to="/automations" />
+                        <SectionHeader title="Automatizaciones (próximas)" to="/automatizaciones" />
                         <Card>
                             <ul>
                                 {AUTOMATIONS_NEXT.map(a => <AutomationRow key={a.id} item={a} />)}
@@ -448,7 +448,7 @@ export default function Home() {
                 {/* Col 2: Lateral */}
                 <div className="space-y-6">
                     <div>
-                        <SectionHeader title="Integraciones conectadas" to="/integrations" />
+                        <SectionHeader title="Integraciones conectadas" to="/integraciones" />
                         <Card>
                             <div className="flex flex-wrap gap-2">
                                 {INTEGRATIONS_CONNECTED.map(i => <IntegrationBadge key={i.id} item={i} />)}
@@ -469,7 +469,7 @@ export default function Home() {
 
             {/* Footer con Easter Egg */}
             <div className="mt-8 flex items-center justify-between text-xs text-zinc-500">
-                <div>v1.1.0</div>
+                <div>v2.1.0</div>
                 <div className="flex items-center gap-3">
                     <a className="max-w-6 hover:underline" target="_blank" href="https://www.instagram.com/vw.cordoba/"><img src="/instagram.png" alt="" /></a>
                     <a className="max-w-6 hover:underline" target="_blank" href="https://www.facebook.com/profile.php?id=61566167519398"><img src="/facebook.png" alt="" /></a>

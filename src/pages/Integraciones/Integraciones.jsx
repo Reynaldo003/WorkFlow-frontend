@@ -20,7 +20,7 @@ const INTEGRATIONS = [
         category: "Datos",
         status: "connected",
         lastSync: "hoy 09:12",
-        connectPath: "/integrations/sheets",
+        connectPath: "/integraciones",
     },
     {
         id: "pbi",
@@ -30,7 +30,7 @@ const INTEGRATIONS = [
         category: "BI",
         status: "disconnected",
         lastSync: null,
-        connectPath: "/integrations/powerbi",
+        connectPath: "/integraciones",
     },
     {
         id: "drive",
@@ -40,7 +40,7 @@ const INTEGRATIONS = [
         category: "Archivos",
         status: "disconnected",
         lastSync: null,
-        connectPath: "/integrations/drive",
+        connectPath: "/integraciones",
     },
     {
         id: "gcal",
@@ -50,7 +50,7 @@ const INTEGRATIONS = [
         category: "Comunicación",
         status: "disconnected",
         lastSync: null,
-        connectPath: "/integrations/google-calendar",
+        connectPath: "/integraciones",
     },
     {
         id: "Meta",
@@ -60,7 +60,7 @@ const INTEGRATIONS = [
         category: "Datos",
         status: "error",
         lastSync: "ayer 09:12",
-        connectPath: "/integrations/meta",
+        connectPath: "/integraciones",
     },
 ];
 
