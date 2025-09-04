@@ -27,7 +27,7 @@ export default function ExcelEditor({ topbarHeight = 64 }) {
 
     const guardarEstructura = async (nuevasSheets) => {
         //await fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/estructura/`, {
-        await fetch(`http://127.0.0.1:8000/archivo/${idArchivo}/estructura/`, {
+        await fetch(`https://workflow-backend-production-991d.up.railway.app/archivo/${idArchivo}/estructura/`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
